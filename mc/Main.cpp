@@ -2,6 +2,26 @@
 
 #include "Payoff.h"
 #include <iostream>
+#include <deque>
+#include <array>
+#include <fmt/printf.h>
+//#include "serialization.h"
+
+class TradeData {
+public:
+
+  
+  void serialize(std::vector<char>& container) const {
+
+  }
+
+private:
+  std::unordered_map<std::string, std::vector<int>> mDatess;
+  std::unordered_map<std::string, std::vector<double>> mDoubless;
+};
+
+
+
 
 int main() {
 
@@ -9,14 +29,14 @@ int main() {
 
     auto payoff = Payoff("C:/dev/VS/MonteCarloPayoffs/out/build/x64-debug/payoffs/CallPut/CallPut.dll");
 
-    std::cout << "Successfully constructed payoff" << std::endl;
+    fmt::println("Successfully constructed payoff");
 
     payoff.test();
 
-    std::cout << "Successfully called test" << std::endl;
+    fmt::println("Successfully called test");
   }
   catch (std::exception const& ex) {
-    std::cout << "Caught exception: " << ex.what() << std::endl;
+    fmt::println("Caught exception: {}", ex.what());
   }
   
 }
