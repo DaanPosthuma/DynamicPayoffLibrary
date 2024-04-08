@@ -20,11 +20,11 @@ namespace {
 namespace serialization::detail {
   template <>
   struct serializer<X> {
-    static void serialize(X const& x, std::deque<char>& stream) {
+    static void serialize(X const& x, std::vector<char>& stream) {
       serialization::serialize(x.x, stream);
     }
 
-    static X deserialize(std::deque<char>& stream) {
+    static X deserialize(std::vector<char>& stream) {
       return X(serialization::deserialize<int>(stream));
     }
   };
@@ -35,7 +35,7 @@ namespace {
   using namespace std::string_literals;
 
   void round_trip(auto obj) {
-    std::deque<char> stream;
+    std::vector<char> stream;
     serialization::serialize(obj, stream);
     REQUIRE(serialization::deserialize<decltype(obj)>(stream) == obj);
   }
@@ -89,7 +89,7 @@ namespace {
   }
 
   TEST_CASE("multiple objects") {
-    std::deque<char> stream;
+    std::vector<char> stream;
 
     for (int i = 0; i != 10; ++i) {
       serialization::serialize(1, stream);

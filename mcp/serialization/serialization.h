@@ -1,6 +1,5 @@
 #pragma once
 
-#include <deque>
 #include <vector>
 #include <string>
 #include <map>
@@ -9,13 +8,15 @@
 
 namespace serialization {
 
+  using Stream = std::vector<char>;
+
   // fwd declarations as these are used in concrete serialization functions
 
   template <class T>
-  void serialize(T const& x, std::deque<char>& stream);
+  void serialize(T const& x, Stream& stream);
 
   template <class T>
-  T deserialize(std::deque<char>& stream);
+  T deserialize(Stream& stream);
 
   namespace detail {
 
@@ -45,23 +46,23 @@ namespace serialization {
     // (de)serialize objects
 
     template <class T>
-    void serialize_object(T const& x, std::deque<char>& stream) {
+    inline void serialize_object(T const& x, Stream& stream) {
       serializer<T>::serialize(x, stream);
     }
 
     template <class T>
-    T deserialize_object(std::deque<char>& stream) {
+    inline T deserialize_object(Stream& stream) {
       return serializer<T>::deserialize(stream);
     }
 
     template <trivial_type T>
-    static void serialize_object(T const& x, std::deque<char>& stream) {
+    inline static void serialize_object(T const& x, Stream& stream) {
       auto const& data = reinterpret_cast<char const*>(&x);
       stream.insert(stream.end(), data, data + sizeof(T));
     }
 
     template <trivial_type T>
-    T deserialize_object(std::deque<char>& stream) {
+    inline T deserialize_object(Stream& stream) {
       T out;
       std::ranges::copy_n(stream.begin(), sizeof(T), reinterpret_cast<char*>(&out));
       stream.erase(stream.begin(), stream.begin() + sizeof(T));
@@ -69,13 +70,13 @@ namespace serialization {
     }
 
     template <>
-    void serialize_object<std::string>(std::string const& str, std::deque<char>& stream) {
+    inline void serialize_object<std::string>(std::string const& str, Stream& stream) {
       serialize_object<size_t>(str.size(), stream);
       stream.insert(stream.end(), str.data(), str.data() + str.size());
     }
 
     template <>
-    std::string deserialize_object<std::string>(std::deque<char>& stream) {
+    inline std::string deserialize_object<std::string>(Stream& stream) {
       auto const len = serialization::deserialize<size_t>(stream);
       std::string out(stream.begin(), stream.begin() + len);
       stream.erase(stream.begin(), stream.begin() + len);
@@ -85,7 +86,7 @@ namespace serialization {
     // (de)serialize vectors
 
     template <class T>
-    void serialize_vector(std::vector<T> const& vec, std::deque<char>& stream) {
+    inline void serialize_vector(std::vector<T> const& vec, Stream& stream) {
       serialize_object<size_t>(vec.size(), stream);
       for (T const& el : vec) {
         serialization::serialize(el, stream);
@@ -93,14 +94,14 @@ namespace serialization {
     }
 
     template <trivial_type T>
-    void serialize_vector(std::vector<T> const& vec, std::deque<char>& stream) {
+    inline void serialize_vector(std::vector<T> const& vec, Stream& stream) {
       serialize_object<size_t>(vec.size(), stream);
       auto const& data = reinterpret_cast<char const*>(vec.data());
       stream.insert(stream.end(), data, data + sizeof(T) * vec.size());
     }
 
     template <>
-    void serialize_vector<bool>(std::vector<bool> const& vec, std::deque<char>& stream) {
+    inline void serialize_vector<bool>(std::vector<bool> const& vec, Stream& stream) {
       serialize_object<size_t>(vec.size(), stream);
       for (bool b : vec) {
         serialize(b, stream);
@@ -108,7 +109,7 @@ namespace serialization {
     }
 
     template <class T>
-    std::vector<T> deserialize_vector(std::deque<char>& stream) {
+    inline std::vector<T> deserialize_vector(Stream& stream) {
       auto const num = serialization::deserialize<size_t>(stream);
       auto vec = std::vector<T>();
       for (int i = 0; i != num; ++i) {
@@ -118,7 +119,7 @@ namespace serialization {
     }
 
     template <trivial_type T>
-    std::vector<T> deserialize_vector(std::deque<char>& stream) {
+    inline std::vector<T> deserialize_vector(Stream& stream) {
       auto const num = serialization::deserialize<size_t>(stream);
       auto vec = std::vector<T>(num);
       std::ranges::copy_n(stream.begin(), num * sizeof(T), reinterpret_cast<char*>(vec.data()));
@@ -127,7 +128,7 @@ namespace serialization {
     }
 
     template <>
-    std::vector<bool> deserialize_vector<bool>(std::deque<char>& stream) {
+    inline std::vector<bool> deserialize_vector<bool>(Stream& stream) {
       auto const num = serialization::deserialize<size_t>(stream);
       auto vec = std::vector<bool>();
       for (int i = 0; i != num; ++i) {
@@ -139,7 +140,7 @@ namespace serialization {
     // (de)serialize maps
 
     template <class MapT>
-    void serialize_map(MapT const& map, std::deque<char>& stream) {
+    inline void serialize_map(MapT const& map, Stream& stream) {
       serialize_object<size_t>(map.size(), stream);
       for (auto const& [k, v] : map) {
         serialization::serialize(k, stream);
@@ -148,7 +149,7 @@ namespace serialization {
     }
 
     template <class MapT>
-    MapT deserialize_map(std::deque<char>& stream) {
+    inline MapT deserialize_map(Stream& stream) {
       auto const num = deserialize<size_t>(stream);
       auto map = MapT();
       for (int i = 0; i != num; ++i) {
@@ -162,40 +163,40 @@ namespace serialization {
     // (de)serialize generic/vector/map specializations
 
     template <class T>
-    void serialize(T const& x, std::deque<char>& stream) {
+    void serialize(T const& x, Stream& stream) {
       serialize_object<T>(x, stream);
     }
     template <vector_type T>
-    void serialize(T const& x, std::deque<char>& stream) {
+    void serialize(T const& x, Stream& stream) {
       serialize_vector<typename T::value_type>(x, stream);
     }
     template <map_type T>
-    void serialize(T const& map, std::deque<char>& stream) {
+    void serialize(T const& map, Stream& stream) {
       serialize_map(map, stream);
     }
 
     template <class T>
-    T deserialize(std::deque<char>& stream) {
+    T deserialize(Stream& stream) {
       return deserialize_object<T>(stream);
     }
     template <vector_type T>
-    T deserialize(std::deque<char>& stream) {
+    T deserialize(Stream& stream) {
       return deserialize_vector<typename T::value_type>(stream);
     }
     template <map_type T>
-    T deserialize(std::deque<char>& stream) {
+    T deserialize(Stream& stream) {
       return deserialize_map<T>(stream);
     }
 
   }
 
   template <class T>
-  void serialize(T const& x, std::deque<char>& stream) {
+  void serialize(T const& x, Stream& stream) {
     detail::serialize<T>(x, stream);
   }
 
   template <class T>
-  T deserialize(std::deque<char>& stream) {
+  T deserialize(Stream& stream) {
     return detail::deserialize<T>(stream);
   }
 
