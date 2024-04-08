@@ -30,23 +30,23 @@ public:
 
 private:
 
-  friend struct detail::serializer<TradeData>;
+  friend struct serialization::detail::serializer<TradeData>;
 
   std::unordered_map<std::string, std::vector<int>> mDatess;
   std::unordered_map<std::string, std::vector<double>> mDoubless;
 };
 
-namespace detail {
+namespace serialization::detail {
   template <>
   struct serializer<TradeData> {
     static void serialize(TradeData const& td, std::deque<char>& stream) {
-      ::serialize(td.mDatess, stream);
-      ::serialize(td.mDoubless, stream);
+      serialization::serialize(td.mDatess, stream);
+      serialization::serialize(td.mDoubless, stream);
     }
 
     static TradeData deserialize(std::deque<char>& stream) {
-      auto datess = ::deserialize<decltype(TradeData::mDatess)>(stream);
-      auto doubless = ::deserialize<decltype(TradeData::mDoubless)>(stream);
+      auto datess = serialization::deserialize<decltype(TradeData::mDatess)>(stream);
+      auto doubless = serialization::deserialize<decltype(TradeData::mDoubless)>(stream);
       return TradeData{datess, doubless};
     }
   };
@@ -64,9 +64,9 @@ int main() {
     trade.setDate("expiry", 500);
 
     std::deque<char> stream;
-    serialize(trade, stream);
+    serialization::serialize(trade, stream);
 
-    auto tradeCopy = deserialize<TradeData>(stream);
+    auto tradeCopy = serialization::deserialize<TradeData>(stream);
 
 
 

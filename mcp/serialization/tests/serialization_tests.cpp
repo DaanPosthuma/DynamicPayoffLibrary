@@ -17,15 +17,15 @@ namespace {
   }
 }
 
-namespace detail {
+namespace serialization::detail {
   template <>
   struct serializer<X> {
     static void serialize(X const& x, std::deque<char>& stream) {
-      ::serialize(x.x, stream);
+      serialization::serialize(x.x, stream);
     }
 
     static X deserialize(std::deque<char>& stream) {
-      return X(::deserialize<int>(stream));
+      return X(serialization::deserialize<int>(stream));
     }
   };
 }
@@ -36,8 +36,8 @@ namespace {
 
   void round_trip(auto obj) {
     std::deque<char> stream;
-    serialize(obj, stream);
-    REQUIRE(deserialize<decltype(obj)>(stream) == obj);
+    serialization::serialize(obj, stream);
+    REQUIRE(serialization::deserialize<decltype(obj)>(stream) == obj);
   }
 
   TEST_CASE("int round trip") {
@@ -92,39 +92,19 @@ namespace {
     std::deque<char> stream;
 
     for (int i = 0; i != 10; ++i) {
-      serialize(1, stream);
-      serialize(5.0, stream);
-      serialize(std::vector{ 1,2,3 }, stream);
-      serialize("test"s, stream);
+      serialization::serialize(1, stream);
+      serialization::serialize(5.0, stream);
+      serialization::serialize(std::vector{ 1,2,3 }, stream);
+      serialization::serialize("test"s, stream);
     }
     
     for (int i = 0; i != 10; ++i) {
-      REQUIRE(deserialize<int>(stream) == 1);
-      REQUIRE(deserialize<double>(stream) == 5.0);
-      REQUIRE(deserialize<std::vector<int>>(stream) == std::vector{ 1,2,3 });
-      REQUIRE(deserialize<std::string>(stream) == "test"s);
+      REQUIRE(serialization::deserialize<int>(stream) == 1);
+      REQUIRE(serialization::deserialize<double>(stream) == 5.0);
+      REQUIRE(serialization::deserialize<std::vector<int>>(stream) == std::vector{ 1,2,3 });
+      REQUIRE(serialization::deserialize<std::string>(stream) == "test"s);
     }
 
-  }
-
-  template <class T>
-  auto f() {
-    return "default"s;
-  }
-
-  template<typename T>
-  concept map_type =
-    std::same_as<T, std::map<typename T::key_type, typename T::mapped_type, typename T::key_compare, typename T::allocator_type>> ||
-    std::same_as<T, std::unordered_map<typename T::key_type, typename T::mapped_type, typename T::hasher, typename T::key_equal, typename T::allocator_type>>;
-
-  template <map_type T>
-  auto f() {
-    return "map"s;
-  }
-
-  TEST_CASE("test test") {
-    REQUIRE(f<int>() == "default");
-    REQUIRE(f<std::map<int, std::string>>() == "map");
   }
 
 }
