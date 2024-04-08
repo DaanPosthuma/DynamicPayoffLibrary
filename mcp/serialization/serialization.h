@@ -152,7 +152,7 @@ namespace detail {
     for (int i = 0; i != num; ++i) {
       auto k = ::deserialize<MapT::key_type>(stream);
       auto v = ::deserialize<MapT::mapped_type>(stream);
-      map.emplace(k, v);
+      map.emplace(std::move(k), std::move(v));
     }
     return map;
   }

@@ -30,8 +30,4 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-include_directories(common)
-
-add_subdirectory (common)
-add_subdirectory (payoffs)
-add_subdirectory (mc)
+add_subdirectory (mcp)

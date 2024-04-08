@@ -1,6 +1,6 @@
 ﻿find_package(fmt CONFIG REQUIRED)
 
-add_executable (MonteCarlo Main.cpp Payoff.cpp)
+add_executable (MonteCarlo main.cpp payoff.cpp)
 
 target_link_libraries(MonteCarlo PRIVATE fmt::fmt)
 
