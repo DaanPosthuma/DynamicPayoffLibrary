@@ -11,7 +11,6 @@ extern "C" {
     std::vector<char> stream(data, data + size);
     auto const trade = serialization::deserialize<TradeData>(stream);
     auto payoff = new CallPutPayoff(trade);
-    payoff->test();
     return payoff;
   }
 
