@@ -14,6 +14,10 @@ DynamicPayoffManager::DynamicPayoffManager(std::string_view filename) {
   auto const hLibrary = LoadLibrary(filename.data());
   if (!hLibrary) throw std::runtime_error("Could not load the dynamic library");
 
+  mFreeLibrary = [hLibrary]() { 
+    if (!FreeLibrary(hLibrary)) std::cout << "Warning! Could not unload payoff library" << std::endl;
+  };
+
   mCreatePayoff = reinterpret_cast<CreatePayoffFun*>(GetProcAddress(hLibrary, "CreatePayoff"));
   if (!mCreatePayoff) throw std::runtime_error("Could not find CreatePayoff function");
 
@@ -36,4 +40,8 @@ void DynamicPayoffManager::usePayoff(DynamicPayoff const& payoff) const {
 
 void DynamicPayoffManager::deletePayoff(DynamicPayoff const& payoff) const {
   mDeletePayoff(payoff.mPtr);
+}
+
+DynamicPayoffManager::~DynamicPayoffManager() {
+  if (mFreeLibrary) mFreeLibrary();
 }
