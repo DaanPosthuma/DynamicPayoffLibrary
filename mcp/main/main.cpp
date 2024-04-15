@@ -4,13 +4,16 @@
 #include "TradeData/TradeData.h"
 #include <fmt/printf.h>
 
+using namespace std::string_literals;
+
 int main() {
 
   try {
 
     TradeData trade;
-    trade.setDouble("strike", 1.5);
-    trade.setDate("expiry", 500);
+    trade.setDouble("Strike", 1.5);
+    trade.setDate("Expiry", 500);
+    trade.setString("DynamicPayoff", "../payoffs/CallPut/CallPut.dll"s);
 
     auto manager = DynamicPayoffManager("../payoffs/CallPut/CallPut.dll");
     fmt::println("Successfully constructed payoff");

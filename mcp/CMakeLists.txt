@@ -3,4 +3,4 @@
 add_subdirectory (serialization)
 add_subdirectory (TradeData)
 add_subdirectory (payoffs)
-add_subdirectory (mc)
+add_subdirectory (main)

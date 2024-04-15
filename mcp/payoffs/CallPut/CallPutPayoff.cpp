@@ -2,7 +2,7 @@
 #include "TradeData/TradeData.h"
 #include <iostream>
 
-CallPutPayoff::CallPutPayoff(TradeData const& trade) : mStrike(trade.getDouble("strike")), mExpiry(trade.getDate("expiry")) {}
+CallPutPayoff::CallPutPayoff(TradeData const& trade) : mStrike(trade.getDouble("Strike")), mExpiry(trade.getDate("Expiry")) {}
 
 void CallPutPayoff::test() const {
   std::cout << "I'm a Call Put payoff" << std::endl;
