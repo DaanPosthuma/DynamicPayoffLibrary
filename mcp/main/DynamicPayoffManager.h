@@ -7,12 +7,6 @@
 
 class TradeData;
 
-class DynamicPayoffDiagnostics {
-public:
-private:
-
-};
-
 class DynamicPayoffManager {
 public:
   DynamicPayoffManager(std::string_view filename);
@@ -20,14 +14,19 @@ public:
   DynamicPayoffManager(DynamicPayoffManager&&) = default;
 
   DynamicPayoffInstance createPayoff(TradeData const& tradeData) const;
+  std::string getRevision() const;
   
-  DynamicPayoffDiagnostics getDiagnostics() const;
+  int numCreated() const;
 
   ~DynamicPayoffManager();
 
 private:
   using CreatePayoffFun = DynamicPayoffInstance(TradeData const&);
+  using GetRevisionFun = std::string();
   
   std::function<CreatePayoffFun> mCreatePayoff;
+  std::function<GetRevisionFun> mGetRevision;
   std::function<void()> mFreeLibrary;
+
+  mutable int mNumCreated = 0;
 };

@@ -7,3 +7,7 @@
 __declspec(dllexport) DynamicPayoffInstance CreatePayoff(TradeData const& trade) {
   return DynamicPayoffInstance(CallPutPayoff(trade));
 }
+
+__declspec(dllexport) std::string GetRevision() {
+  return GIT_COMMIT_HASH;
+}

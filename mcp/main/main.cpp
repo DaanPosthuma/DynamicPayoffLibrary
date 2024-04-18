@@ -5,10 +5,10 @@
 #include <fmt/printf.h>
 
 
-void EvaluateTrades(std::vector<TradeData> const& trades, DynmamicPayoffManagerCollection const& payoffCollection) {
+void EvaluateTrades(std::vector<TradeData> const& trades, DynmamicPayoffManagerCollection const& payoffManagers) {
   
   for (auto const& trade : trades) {
-    auto const payoff = payoffCollection.create(trade);
+    auto const payoff = payoffManagers.createPayoffInstance(trade);
     payoff.test();
   }
 }
@@ -27,17 +27,23 @@ int main() {
     trade1.setDate("Expiry", 500);
     trade1.setString("PayoffId", "CallPut");
 
-    auto const payoffs = DynmamicPayoffManagerCollection({{"CallPut", "../payoffs/CallPut/CallPut.dll"}});
+    auto const payoffManagers = DynmamicPayoffManagerCollection({{"CallPut", "../payoffs/CallPut/CallPut.dll"}});
 
-    EvaluateTrades({trade0, trade1}, payoffs);
-
-    auto diagnostics = payoffs.getDiagnostics();
-    
     fmt::println("");
-    fmt::println("Diagnostics: ");
-    for (auto const& [payoffId, diagnostics] : diagnostics) {
-      
-      fmt::println("PayoffId: {}", payoffId);
+    fmt::println("Dynamic Payoff Revisions: ");
+    for (auto const& [payoffId, revision] : payoffManagers.getRevisions()) {
+
+      fmt::println("{}: {}", payoffId, revision);
+    }
+    fmt::println("");
+
+    EvaluateTrades({trade0, trade1}, payoffManagers);
+
+    fmt::println("");
+    fmt::println("Num created: ");
+    for (auto const& [payoffId, numCreated] : payoffManagers.getNumCreated()) {
+
+      fmt::println("{}: {}", payoffId, numCreated);
     }
 
   }

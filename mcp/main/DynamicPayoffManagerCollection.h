@@ -7,8 +7,9 @@
 class DynmamicPayoffManagerCollection {
 public:
   DynmamicPayoffManagerCollection(std::initializer_list<std::pair<std::string, std::string>> idToPath);
-  DynamicPayoffInstance create(TradeData const& tradeData) const;
-  std::unordered_map<std::string, DynamicPayoffDiagnostics> getDiagnostics() const;
+  DynamicPayoffInstance createPayoffInstance(TradeData const& tradeData) const;
+  std::unordered_map<std::string, std::string> getRevisions() const;
+  std::unordered_map<std::string, int> getNumCreated() const;
 
 private:
   std::unordered_map<std::string, DynamicPayoffManager> mPayoffManagers;
