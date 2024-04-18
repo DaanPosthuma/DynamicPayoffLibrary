@@ -1,1 +1,4 @@
-﻿add_library (CallPut SHARED Interface.cpp CallPutPayoff.cpp)
+﻿add_library (CallPut SHARED CallPutInterface.cpp CallPutPayoff.cpp)
+target_link_options(CallPut PRIVATE 
+        /DEF:${CMAKE_CURRENT_SOURCE_DIR}/../DynamicPayoffInterface.def
+)

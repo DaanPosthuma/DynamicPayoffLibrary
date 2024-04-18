@@ -1,6 +1,5 @@
 #pragma once
 
-#include "serialization/serialization.h"
 #include <unordered_map>
 #include <vector>
 #include <string>
@@ -79,7 +78,6 @@ private:
     return std::tie(mDates, mDoubles);
   }
 
-  friend struct serialization::detail::serializer<TradeData>;
   friend bool operator==(TradeData const& lhs, TradeData const& rhs) noexcept;
 
   std::unordered_map<std::string, std::vector<int>> mDates;
@@ -91,23 +89,3 @@ private:
 inline bool operator==(TradeData const& lhs, TradeData const& rhs) noexcept {
   return lhs.tie() == rhs.tie();
 }
-
-
-namespace serialization::detail {
-  template <>
-  struct serializer<TradeData> {
-    static void serialize(TradeData const& td, std::vector<char>& stream) {
-      serialization::serialize(td.mDates, stream);
-      serialization::serialize(td.mDoubles, stream);
-      serialization::serialize(td.mStrings, stream);
-    }
-
-    static TradeData deserialize(std::vector<char>& stream) {
-      auto dates = serialization::deserialize<decltype(TradeData::mDates)>(stream);
-      auto doubles = serialization::deserialize<decltype(TradeData::mDoubles)>(stream);
-      auto strings = serialization::deserialize<decltype(TradeData::mStrings)>(stream);
-      return TradeData{ std::move(dates), std::move(doubles), std::move(strings) };
-    }
-  };
-}
-

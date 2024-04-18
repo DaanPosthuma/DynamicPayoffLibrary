@@ -3,17 +3,14 @@
 #include <functional>
 #include <string_view>
 #include <memory>
+#include "payoffs/DynamicPayoffInstance.h"
 
 class TradeData;
-class DynamicPayoffManager;
 
-class DynamicPayoff {
+class DynamicPayoffDiagnostics {
 public:
 private:
-  DynamicPayoff(void const* ptr) : mPtr(ptr) {}
-  friend class DynamicPayoffManager;
 
-  void const* mPtr;
 };
 
 class DynamicPayoffManager {
@@ -22,19 +19,15 @@ public:
   DynamicPayoffManager(DynamicPayoffManager const&) = delete;
   DynamicPayoffManager(DynamicPayoffManager&&) = default;
 
-  DynamicPayoff createPayoff(TradeData const& tradeData) const;
-  void usePayoff(DynamicPayoff const& payoff) const;
-  void deletePayoff(DynamicPayoff const& payoff) const;
+  DynamicPayoffInstance createPayoff(TradeData const& tradeData) const;
+  
+  DynamicPayoffDiagnostics getDiagnostics() const;
 
   ~DynamicPayoffManager();
 
 private:
-  using CreatePayoffFun = void const* (char const*, size_t);
-  using UsePayoffFun = void(void const*);
-  using DeletePayoffFun = void(void const*);
-
+  using CreatePayoffFun = DynamicPayoffInstance(TradeData const&);
+  
   std::function<CreatePayoffFun> mCreatePayoff;
-  std::function<UsePayoffFun> mUsePayoff;
-  std::function<DeletePayoffFun> mDeletePayoff;
   std::function<void()> mFreeLibrary;
 };
