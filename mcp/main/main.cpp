@@ -20,29 +20,34 @@ int main() {
     TradeData trade0;
     trade0.setDouble("Strike", 1.3);
     trade0.setDate("Expiry", 400);
-    trade0.setString("PayoffId", "CallPut");
+    trade0.setString("PayoffId", "CallPutA");
 
     TradeData trade1;
     trade1.setDouble("Strike", 1.5);
     trade1.setDate("Expiry", 500);
-    trade1.setString("PayoffId", "CallPut");
+    trade1.setString("PayoffId", "CallPutA");
 
-    auto const payoffManagers = DynmamicPayoffManagerCollection({{"CallPut", "../payoffs/CallPut/CallPut.dll"}});
+    TradeData trade2;
+    trade2.setDouble("Strike", 1.5);
+    trade2.setDate("Expiry", 500);
+    trade2.setString("PayoffId", "CallPutB");
+
+    auto const payoffManagers = DynmamicPayoffManagerCollection({ {"CallPutA", "../payoffs/CallPut/CallPut.dll"} ,
+                                                                  {"CallPutB", "../payoffs/CallPut/CallPut.dll"} });
 
     fmt::println("");
-    fmt::println("Dynamic Payoff Revisions: ");
+    fmt::println("Application revision: {}", GIT_COMMIT_HASH);
+    fmt::println("Dynamic payoff revisions: ");
     for (auto const& [payoffId, revision] : payoffManagers.getRevisions()) {
-
       fmt::println("{}: {}", payoffId, revision);
     }
     fmt::println("");
 
-    EvaluateTrades({trade0, trade1}, payoffManagers);
+    EvaluateTrades({trade0, trade1, trade2}, payoffManagers);
 
     fmt::println("");
     fmt::println("Num created: ");
     for (auto const& [payoffId, numCreated] : payoffManagers.getNumCreated()) {
-
       fmt::println("{}: {}", payoffId, numCreated);
     }
 
